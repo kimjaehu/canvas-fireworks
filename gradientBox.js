@@ -1,9 +1,9 @@
 export class GradientBox {
   constructor(y) {
     this.y = y;
-    this.vy = Math.random() * 4;
-    this.minHeight = 600;
-    this.maxHeight = 900;
+    this.vy = Math.random() * 6;
+    this.minHeight = 150;
+    this.maxHeight = 300;
     this.height = this.randomHeight();
   }
 
@@ -15,10 +15,10 @@ export class GradientBox {
   draw(ctx, color, stageWidth, stageHeight) {
     this.y += this.vy;
 
-    if (this.y < 0) {
+    if (this.y < 0 - this.height / 2) {
       this.vy *= -1;
       this.y += 10;
-    } else if (this.y > stageHeight) {
+    } else if (this.y > stageHeight + this.height / 2) {
       this.vy *= -1;
       this.y -= 10;
     }
