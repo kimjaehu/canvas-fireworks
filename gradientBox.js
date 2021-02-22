@@ -1,9 +1,9 @@
 export class GradientBox {
   constructor(y) {
     this.y = y;
-    this.vy = Math.random() * 4;
-    this.minHeight = 150;
-    this.maxHeight = 300;
+    this.vy = Math.random() * 8;
+    this.minHeight = 300;
+    this.maxHeight = 600;
     this.height = this.randomHeight();
   }
 
@@ -12,16 +12,20 @@ export class GradientBox {
     this.stageHeight = stageHeight;
   }
 
-  draw(ctx, color, stageWidth, stageHeight) {
+  draw(ctx, color, stageWidth, stageHeight, translateX, translateY, scale) {
     this.y += this.vy;
 
-    if (this.y < 0 - this.height / 2) {
+    if (this.y < 0 - stageWidth / scale) {
       this.vy *= -1;
       this.y += 10;
-    } else if (this.y > stageHeight + this.height / 2) {
+    } else if (this.y > stageHeight + this.height / scale) {
       this.vy *= -1;
       this.y -= 10;
     }
+
+    ctx.save();
+    ctx.translate((stageWidth - translateX) / scale, -translateY);
+    ctx.rotate((Math.PI / 180) * 120);
 
     ctx.fillStyle = `rgb(${color.r},${color.g},${color.b})`;
 
@@ -37,7 +41,13 @@ export class GradientBox {
     grd.addColorStop(1, `rgba(${color.r},${color.g},${color.b}, 0)`);
 
     ctx.fillStyle = grd;
-    ctx.fillRect(0, this.y, stageWidth, this.height);
+    ctx.fillRect(
+      0,
+      this.y,
+      Math.sqrt(stageWidth * stageWidth + stageHeight * stageHeight) / scale,
+      this.height
+    );
+    ctx.restore();
   }
 
   randomHeight() {
