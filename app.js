@@ -1,13 +1,15 @@
+import { Firework } from "./firework.js";
 import { GradientBox } from "./gradientBox.js";
+import { Particle } from "./particle.js";
 
 const COLORS = [
-  //purle, blue, green, yellow, orange, red
-  { r: 173, g: 17, b: 255 },
-  { r: 10, g: 92, b: 255 },
-  { r: 26, g: 242, b: 20 },
-  { r: 255, g: 239, b: 11 },
-  { r: 255, g: 126, b: 11 },
-  { r: 253, g: 11, b: 59 },
+  //blue, yellow, red, pink, purple
+
+  { r: 57, g: 62, b: 143 }, //blue
+  { r: 243, g: 204, b: 100 }, //Yellow
+  { r: 177, g: 34, b: 40 }, //Red
+  { r: 239, g: 190, b: 183 }, //Pink
+  { r: 167, g: 107, b: 254 }, //purple
 ];
 
 class App {
@@ -39,6 +41,14 @@ class App {
     this.numBoxes = 30;
     this.pixelRatio = window.devicePixelRatio > 1 ? 2 : 1;
 
+    this.fireworks = [];
+
+    this.particleCnt = 5;
+    this.particles = [];
+
+    this.stars = [];
+
+    window.addEventListener("pointerup", this.onUp.bind(this), false);
     window.addEventListener("resize", this.resize.bind(this), false);
     this.resize();
 
@@ -55,6 +65,16 @@ class App {
     this.ctx.scale(this.pixelRatio, this.pixelRatio);
 
     this.createBoxes();
+  }
+
+  explode(x, y) {
+    for (let i = 0; i < this.particleCnt; i++) {
+      this.particles.push(new Particle(x, y));
+    }
+    for (let i = 0; i < this.particles.length; i++) {
+      const particle = this.particles[i];
+      particle.draw(this.ctx);
+    }
   }
 
   createBoxes() {
@@ -74,31 +94,26 @@ class App {
 
   drawPath() {
     if (this.pathWidth > this.stageWidth) {
-      this.pathPos.scale = this.stageWidth / this.pathWidth;
+      this.pathPos.scale = (this.stageWidth * 0.8) / this.pathWidth;
       this.pathPos.x =
         (this.stageWidth - this.pathWidth * this.pathPos.scale) / 2;
-      this.pathPos.y = this.stageHeight - this.pathHeight * this.pathPos.scale;
+      this.pathPos.y =
+        (this.stageHeight - this.pathHeight * this.pathPos.scale) * 0.8;
     } else {
-      this.pathPos.scale = 1;
+      this.pathPos.scale = 0.5;
       this.pathPos.x =
         (this.stageWidth - this.pathWidth * this.pathPos.scale) / 2;
-      this.pathPos.y = this.stageHeight - this.pathHeight * this.pathPos.scale;
+      this.pathPos.y =
+        (this.stageHeight - this.pathHeight * this.pathPos.scale) * 0.8;
     }
-
-    console.log(
-      this.stageHeight,
-      this.pathHeight * this.pathPos.scale,
-      this.pathPos.y
-    );
 
     this.ctx.strokeStyle = "#ffffff";
     this.ctx.lineWidth = 10 * this.pathPos.scale;
 
-    this.ctx.scale(this.pathPos.scale, this.pathPos.scale);
     this.ctx.translate(this.pathPos.x, this.pathPos.y);
+    this.ctx.scale(this.pathPos.scale, this.pathPos.scale);
 
     this.ctx.clip(this.p);
-    // this.ctx.stroke(this.p);
   }
 
   animate(t) {
@@ -109,6 +124,8 @@ class App {
     this.drawPath();
 
     let curColor = 0;
+
+    let fired = {};
 
     for (let i = 0; i < this.boxes.length; i++) {
       const color = COLORS[curColor];
@@ -128,6 +145,24 @@ class App {
       if (curColor >= COLORS.length) curColor = 0;
     }
     this.ctx.restore();
+
+    for (let i = 0; i < this.fireworks.length; i++) {
+      const firework = this.fireworks[i];
+      fired = firework.draw(this.ctx);
+      if (fired.isExploded) {
+        this.fireworks.splice(i, 1);
+        this.explode(fired.x, fired.y);
+      }
+    }
+  }
+
+  onUp(e) {
+    let cx = e.clientX;
+    let cy = e.clientY;
+
+    this.fireworks.push(
+      new Firework(cx, cy, this.stageWidth, this.stageHeight)
+    );
   }
 }
 
