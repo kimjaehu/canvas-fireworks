@@ -1,6 +1,7 @@
 import { Firework } from "./firework.js";
 import { GradientBox } from "./gradientBox.js";
 import { Particle } from "./particle.js";
+import { Star } from "./star.js";
 
 const COLORS = [
   //blue, yellow, red, pink, purple
@@ -10,6 +11,10 @@ const COLORS = [
   { r: 177, g: 34, b: 40 }, //Red
   { r: 239, g: 190, b: 183 }, //Pink
   { r: 167, g: 107, b: 254 }, //purple
+];
+
+const FIREWORK_COLORS = [
+  { r: 255, g: 207, b: 64 }, // yellow
 ];
 
 class App {
@@ -38,15 +43,16 @@ class App {
     };
 
     this.boxes = [];
-    this.numBoxes = 30;
+    this.numBoxes = 20;
     this.pixelRatio = window.devicePixelRatio > 1 ? 2 : 1;
 
     this.fireworks = [];
 
-    this.particleCnt = 5;
+    this.particleCnt = 25;
     this.particles = [];
 
     this.stars = [];
+    this.starsCnt = 150;
 
     window.addEventListener("pointerup", this.onUp.bind(this), false);
     window.addEventListener("resize", this.resize.bind(this), false);
@@ -65,15 +71,20 @@ class App {
     this.ctx.scale(this.pixelRatio, this.pixelRatio);
 
     this.createBoxes();
+    this.createStars();
   }
 
   explode(x, y) {
     for (let i = 0; i < this.particleCnt; i++) {
-      this.particles.push(new Particle(x, y));
-    }
-    for (let i = 0; i < this.particles.length; i++) {
-      const particle = this.particles[i];
-      particle.draw(this.ctx);
+      const color = FIREWORK_COLORS[0];
+      let light = Boolean;
+
+      if (i % 5 == 0) {
+        light = true;
+      } else {
+        light = false;
+      }
+      this.particles.push(new Particle(x, y, color, light));
     }
   }
 
@@ -89,6 +100,18 @@ class App {
 
       const gradientBox = new GradientBox(y);
       this.boxes.push(gradientBox);
+    }
+  }
+
+  createStars() {
+    this.stars = [];
+    let x, y;
+    for (let i = 0; i < this.starsCnt; i++) {
+      x = Math.random() * this.stageWidth;
+      y = Math.random() * this.stageHeight;
+
+      const star = new Star(x, y);
+      this.stars.push(star);
     }
   }
 
@@ -120,12 +143,19 @@ class App {
     requestAnimationFrame(this.animate.bind(this));
     this.ctx.clearRect(0, 0, this.stageWidth, this.stageHeight);
 
+    for (let i = 0; i < this.stars.length; i++) {
+      const star = this.stars[i];
+      star.draw(this.ctx);
+    }
+
     this.ctx.save();
     this.drawPath();
 
     let curColor = 0;
 
     let fired = {};
+
+    let vanished = false;
 
     for (let i = 0; i < this.boxes.length; i++) {
       const color = COLORS[curColor];
@@ -152,6 +182,15 @@ class App {
       if (fired.isExploded) {
         this.fireworks.splice(i, 1);
         this.explode(fired.x, fired.y);
+      }
+    }
+
+    for (let i = 0; i < this.particles.length; i++) {
+      const particle = this.particles[i];
+      vanished = particle.draw(this.ctx);
+
+      if (vanished) {
+        this.particles.splice(i, 1);
       }
     }
   }

@@ -2,8 +2,8 @@ export class GradientBox {
   constructor(y) {
     this.y = y;
     this.vy = Math.random() * 16 - 8;
-    this.minHeight = 400;
-    this.maxHeight = 800;
+    this.minHeight = 800;
+    this.maxHeight = 1400;
     this.height = this.randomHeight();
   }
 
