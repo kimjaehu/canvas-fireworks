@@ -7,6 +7,9 @@ export class Star {
   }
 
   draw(ctx) {
+
+    ctx.globalCompositeOperation='source-over';
+
     this.radius += this.twinkle;
     if (this.radius >= 1.5) {
       this.twinkle *= -1;

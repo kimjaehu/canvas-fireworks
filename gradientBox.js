@@ -1,13 +1,16 @@
 export class GradientBox {
-  constructor(y) {
+  constructor(y, img) {
     this.y = y;
     this.vy = Math.random() * 16 - 8;
     // this.minHeight = 800;
     // this.maxHeight = 1400;
-    this.minHeight = 100;
-    this.maxHeight = 100;
+    this.img = img;
     
+    this.minHeight = 400;
+    this.maxHeight = 1400;
+
     this.height = this.randomHeight();
+
   }
 
   resize(stageWidth, stageHeight) {
@@ -16,26 +19,23 @@ export class GradientBox {
   }
 
   draw(ctx, color, translateX, translateY, scale) {
-    this.y += this.vy;
 
-    if (this.y < 0 - this.stageWidth / scale) {
-      this.vy *= -1;
-      this.y += 10;
-    } else if (this.y > this.stageHeight + this.height / scale) {
-      this.vy *= -1;
-      this.y -= 10;
-    }
+    // this.y += this.vy;
 
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.translate((this.stageWidth - translateX) / scale, -translateY);
-    ctx.rotate((Math.PI / 180) * 120);
-
+    // if (this.y < this.stageWidth * 0.5) {
+    //   this.vy *= -1;
+    //   this.y += 10;
+    // } else if (this.y > this.stageHeight + this.height) {
+    //   this.vy *= -1;
+    //   this.y -= 10;
+    // }
+    
     ctx.fillStyle = `rgb(${color.r},${color.g},${color.b})`;
 
     const grd = ctx.createLinearGradient(
-      this.stageWidth / 2,
+      this.stageWidth * 0.5,
       this.y,
-      this.stageWidth / 2,
+      this.stageWidth * 0.5,
       this.y + this.height
     );
 
@@ -44,14 +44,38 @@ export class GradientBox {
     grd.addColorStop(1, `rgba(${color.r},${color.g},${color.b}, 0)`);
 
     ctx.fillStyle = grd;
+    // ctx.fillRect(
+    //   0,
+    //   this.y,
+    //   Math.sqrt(this.stageWidth * this.stageWidth + this.stageHeight * this.stageHeight) / scale,
+    //   this.height
+    // );
+
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.drawImage(this.img, this.stageWidth * 0.5, this.stageHeight * 0.75)
+
+    
+
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    
+    // ctx.translate((this.stageWidth - translateX) / scale, -translateY);
+    // ctx.translate(this.stageWidth * 0.5, this.stageHeight * 0.5);
+    ctx.translate(0, this.stageHeight);
+    ctx.rotate((Math.PI / 180) * -50);
+
+    ctx.globalCompositeOperation = 'source-in';
+
     ctx.fillRect(
-      0,
-      this.y,
-      Math.sqrt(this.stageWidth * this.stageWidth + this.stageHeight * this.stageHeight) / scale,
+      0, this.y, 
+      // Math.sqrt(this.stageWidth * this.stageWidth + this.stageHeight * this.stageHeight), 
+      this.stageWidth,
       this.height
-    );
-    // ctx.restore();
+    )
+   
+    
+    
   }
+
 
   randomHeight() {
     return Math.random() * (this.maxHeight - this.minHeight) + this.minHeight;
